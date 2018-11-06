@@ -1,9 +1,11 @@
 import { module, test } from 'qunit';
 import { visit, currentURL, click } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
+import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
 
 module('Acceptance | list rentals', function(hooks) {
   setupApplicationTest(hooks);
+  setupMirage(hooks);
 
   test('should show rentals as the home page', async function (assert) {
     await visit("/");
@@ -23,6 +25,9 @@ module('Acceptance | list rentals', function(hooks) {
   });
 
   test('should list available rentals.', async function (assert) {
+    const LISTING_NUM = 3;
+    await visit('/');
+    assert.equal(this.element.querySelectorAll('.listing').length, LISTING_NUM, 'should display all listing');
   });
 
   test('should filter the list of rentals by city.', async function (assert) {
