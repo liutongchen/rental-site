@@ -1,26 +1,66 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render } from '@ember/test-helpers';
+import { render, settled, triggerKeyEvent, fillIn } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
+import { resolve } from 'rsvp';
 
-module('Integration | Component | list-filter', function(hooks) {
+const ITEMS = [{ city: 'San Francisco' }, { city: 'Portland' }, { city: 'Seattle' }];
+const FILTERED_ITEMS = [{ city: 'San Francisco' }];
+
+module('Integration | Component | list-filter', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+  test('should initially load all listings', async function (assert) {
+    this.set('filterByCity', () => resolve({ query: '', results: ITEMS }));
 
-    await render(hbs`{{list-filter}}`);
-
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
+    // with an integration test,
+    // you can set up and use your component in the same way your application
+    // will use it.
     await render(hbs`
-      {{#list-filter}}
-        template block text
+      {{#list-filter filter=(action filterByCity) as |results|}}
+        <ul>
+        {{#each results as |item|}}
+          <li class="city">
+            {{item.city}}
+          </li>
+        {{/each}}
+        </ul>
       {{/list-filter}}
     `);
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    return settled().then(() => {
+      assert.equal(this.element.querySelectorAll('.city').length, ITEMS.length);
+      assert.equal(this.element.querySelector('.city').textContent.trim(), 'San Francisco');
+    })
+  });
+
+  test('should return the filtered city', async function (assert) {
+    const INPUT = 's';
+    this.set('filterByCity', (param) => {
+      if (param !== '') {
+        return { results: FILTERED_ITEMS, query: param };
+      }
+      return { results: ITEMS, query: param };
+    })
+
+    await render(hbs`
+    {{#list-filter filter=(action filterByCity) as |results|}}
+      <ul>
+      {{#each results as |item|}}
+        <li class="city">
+          {{item.city}}
+        </li>
+      {{/each}}
+      </ul>
+    {{/list-filter}}
+  `);
+
+  await fillIn(this.element.querySelector('.list-filter input'), INPUT);
+  await triggerKeyEvent(this.element.querySelector('.list-filter input', 'keyup', INPUT.charCodeAt(0)))
+
+  return settled().then(() => {
+    assert.equal(this.element.querySelector('.city').length, 1, 'should return 1 result');
+    assert.equal(this.element.querySelector('.city').textContent.trim(), 'San Francisco');
+  })
   });
 });

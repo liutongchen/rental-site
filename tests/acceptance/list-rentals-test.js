@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { visit, currentURL, click } from '@ember/test-helpers';
+import { visit, currentURL, click, fillIn, triggerKeyEvent } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
 import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
 
@@ -31,6 +31,12 @@ module('Acceptance | list rentals', function(hooks) {
   });
 
   test('should filter the list of rentals by city.', async function (assert) {
+    await visit('/');
+    await fillIn(this.element.querySelector('.list-filter input'), 'Seattle');
+    await triggerKeyEvent(this.element.querySelector('.list-filter input'), 'keyup', 69);
+    assert.equal(this.element.querySelectorAll('.listing').length, 1, 'should only display 1 listing');
+    assert.ok(this.element.querySelector('.listing .location').textContent.includes('Seattle'),
+      'should contain 1 listing in Seattle');
   });
 
   test('should show details for a selected rental', async function (assert) {

@@ -5,13 +5,18 @@ export default Component.extend({
     classNames: ['list-filter'],
     init() {
         this._super(...arguments);
-        this.filter('').then(res => this.set('results', res));
+        this.filter('').then(allRes => this.set('results', allRes.results));
     },
     actions: {
         handleFilterEntry() {
             let filterVal = this.value;
             let filterAction = this.filter;
-            return filterAction(filterVal).then(filterRes => this.set('results', filterRes));
+            filterAction(filterVal)
+            .then(filterRes => {
+                if (filterRes.query === filterVal) {
+                    this.set('results', filterRes.results)
+                }
+            });
         }
     }
 });
