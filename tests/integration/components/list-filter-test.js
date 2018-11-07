@@ -38,9 +38,9 @@ module('Integration | Component | list-filter', function (hooks) {
     const INPUT = 's';
     this.set('filterByCity', (param) => {
       if (param !== '') {
-        return { results: FILTERED_ITEMS, query: param };
+        return resolve({ results: FILTERED_ITEMS, query: param });
       }
-      return { results: ITEMS, query: param };
+      return resolve({ results: ITEMS, query: param });
     })
 
     await render(hbs`
@@ -56,10 +56,10 @@ module('Integration | Component | list-filter', function (hooks) {
   `);
 
   await fillIn(this.element.querySelector('.list-filter input'), INPUT);
-  await triggerKeyEvent(this.element.querySelector('.list-filter input', 'keyup', INPUT.charCodeAt(0)))
+  await triggerKeyEvent(this.element.querySelector('.list-filter input'), 'keyup', 83);
 
   return settled().then(() => {
-    assert.equal(this.element.querySelector('.city').length, 1, 'should return 1 result');
+    assert.equal(this.element.querySelectorAll('.city').length, 1, 'should return 1 result');
     assert.equal(this.element.querySelector('.city').textContent.trim(), 'San Francisco');
   })
   });

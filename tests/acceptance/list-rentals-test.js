@@ -51,6 +51,9 @@ module('Acceptance | list rentals', function (hooks) {
   });
 
   test('should show details for a selected rental', async function (assert) {
-
+    await visit('/rentals');
+    await click('.grand-old-mansion');
+    assert.equal(currentURL(), '/rentals/grand-old-mansion', 'should navigation to the show route');
+    assert.ok(this.element.querySelector('.show-listing .title'), 'should show title');
   });
 });
